@@ -126,3 +126,32 @@ UDFs:
 * DEFINE LogLoader org.apache.pig.piggybank.storage.apachelog.CombinedLogLoader();
 * DEFINE DayExtractor org.apache.pig.piggybank.evaluation.util.apachelogparser.DateExtractor('yyyy-MM-dd');
 * DEFINE HostExtractor org.apache.pig.piggybank.evaluation.util.apachelogparser.HostExtractor();
+
+Fragment-replicated join: (Hadoop Distributed Cache)
+* joined = JOIN daily BY (exchange, symbol), divs BY (exchange, symbol) USING 'replicated';
+* The using 'replicated' tells Pig to use the fragment-replicate algorithm to execute this join.
+* Because no reduce phase is necessary, all of this can be done in the map task.
+
+Mergejoin:
+* joined = JOIN daily BY symbol, divs BY symbol USING 'merge';
+
+Set:
+* The set command is used to set the environment in which Pig runs the MapReduce jobs.
+* set default_parallel 10;
+* set job.name my_job;
+* set opt.multiquery false;
+* set io.sort.mb 2048; --give it 2G
+
+Preprocessor
+Parameters:
+* pig -p DATE=2009-12-17 daily.pig
+* pig -param_file daily.params daily.pig
+* yesterday = filter daily by date == '$DATE';
+* %default parallel_factor 10;
+* %declare and %default
+
+Debugging:
+* DESCRIBE relation;
+* EXPLAIN relation;
+* bin/pig -x local -e 'explain -script explain.pig'
+* ILLUSTRATE relation;
