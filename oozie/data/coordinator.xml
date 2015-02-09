@@ -1,0 +1,18 @@
+<coordinator-app name="MY_APP" frequency="0-59/15 * * * *" start="${start}" end="${end}" timezone="UTC" xmlns="uri:oozie:coordinator:0.2">
+   <datasets>
+      <dataset name="input1" frequency="60" initial-instance="2009-01-01T00:00Z" timezone="UTC">
+         <uri-template>hdfs://localhost:9000/logs/${YEAR}/${MONTH}/${DAY}/${HOUR}</uri-template>
+      </dataset>
+   </datasets>
+   <input-events>
+      <data-in name="coordInput1" dataset="input1">
+          <start-instance>${coord:current(-23)}</start-instance>
+          <end-instance>${coord:current(0)}</end-instance>
+      </data-in>
+   </input-events>
+   <action>
+      <workflow>
+         <app-path>hdfs://localhost:9000/tmp/workflows</app-path>
+      </workflow>
+   </action>
+</coordinator-app>

@@ -1,0 +1,14 @@
+<workflow-app xmlns="uri:oozie:workflow:0.4" name="every-fifteen-minutes">
+  <start to="mkdir"/>
+  <action name="mkdir">
+     <fs>
+        <mkdir path="${nameNode}/user/hue/oozie-test/every-fifteen-minutes/${wf:id()}"/>
+     </fs>
+     <ok to="end"/>
+     <error to="fail"/>
+  </action>
+  <kill name="fail">
+    <message>mkdir failed, error message [${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+  <end name="end"/>
+</workflow-app>
