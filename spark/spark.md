@@ -1,9 +1,44 @@
 # Notes on Spark
 
 ## Limitations of Hadoop
-* Lack of iteration support
+* Lot of use case specific tools: MapReduce, Pig, Hive, Storm.
 * High latency due to persisting intermediate data onto disk
+* Lack of support for iteration (ML) and streaming (prediction).
 
+## Spark
+* Spark is a cluster computing platform designed to be fast and general purpose.
+* Spark has ability to run computations in memory.
+* It supports batch applications, iterative algorithms, interactive queries, and stream processing.
+* It is highly accessible, offering simple APIs in Python, Java, Scala, and SQL, and rich built-in libraries.
+* It integrates closely with other Big Data tools. In particular, Spark can run in Hadoop clusters and access any Hadoop data source, including Cassandra.
+* Spark is a computational engine that is responsible for scheduling, distributing, and monitoring applications consisting of computational tasks across cluster.
+* Spark Core: Scheduler, memory manager, fault recoverer, storage drivers and most importantly, RDD.
+
+## Spark SQL
+* Spark SQL is Spark’s package for working with structured data.
+* Also supports Hive Query Language (HQL), Parquet, and JSON.
+* Allows intermixing of SQL queries with the programmatic data manipulations supported by RDDs in Python, Java, and Scala.
+
+## Spark Streaming
+* Spark Streaming is a Spark component that enables processing of live streams of data.
+* Spark Streaming provides an API for manipulating data streams that closely matches the Spark Core’s RDD API.
+
+## MLlib
+* Machine learning library containing common functionality
+* Includes classification, regression, clustering, and collaborative filtering.
+
+## GraphX
+* GraphX is a library for manipulating graphs (e.g., a social network’s friend graph) and performing graph-parallel computations.
+* It also provides various operators for manipulating graphs (e.g., subgraph and mapVertices )
+* Includes a library of common graph algorithms (e.g., PageRank and triangle counting
+
+## Cluster Managers
+* Spark can run over Hadoop YARN, Apache Mesos.
+* Comes with builtin cluster manager called the Standalone Scheduler.
+
+## Storage
+* Spark can create distributed datasets from any file stored in the Hadoop distributed filesystem (HDFS) or other storage systems supported by the Hadoop APIs (including your local filesystem, Amazon S3, Cassandra, Hive, HBase, etc.).
+* Spark supports text files, SequenceFiles, Avro, Parquet, and any other Hadoop InputFormat.
 
 ## Resilient Distributed Datasets (RDDs)
 
@@ -41,6 +76,11 @@ Notice that the re-execution of lost partition is exactly the same as the lazy e
 However, re-execution across wide dependencies can touch a lot of parent RDD across multiple machines and may cause re-execution of everything. To mitigate this, Spark persist the intermediate data output from a Map phase before it shuffle them to different machines executing the reduce phase.  In case of machine crash, the re-execution (from another surviving machine) just need to trace back to fetch the intermediate data from the corresponding partition of the mapper's persisted output.  Spark also provide a checkpoint API to explicitly persist intermediate RDD so re-execution (when crash) doesn't need to trace all the way back to the beginning.  In future, Spark will perform check-pointing automatically by figuring out a good balance between the latency of recovery and the overhead of check-pointing based on statistical result.
 
 Spark provides a powerful processing framework for building low latency, massively parallel processing for big data analytics.  It supports API around the RDD abstraction with a set of operation for transformation and action for a number of popular programming language like Scala, Java and Python.
+
+## Docker
+* Pull: docker pull sequenceiq/spark:1.2.0
+* Build: docker build --rm -t sequenceiq/spark:1.2.0 .
+* Run: docker run -i -t -h sandbox sequenceiq/spark:1.2.0 bash
 
 ## References
 * http://horicky.blogspot.com/2013/12/spark-low-latency-massively-parallel.html
