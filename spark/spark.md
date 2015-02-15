@@ -79,8 +79,11 @@ Spark provides a powerful processing framework for building low latency, massive
 
 ## Docker
 * Pull: docker pull sequenceiq/spark:1.2.0
-* Build: docker build --rm -t sequenceiq/spark:1.2.0 .
 * Run: docker run -i -t -h sandbox sequenceiq/spark:1.2.0 bash
+* Test run:
+* * cd /usr/local/spark
+* * ./bin/spark-shell --master yarn-client --driver-memory 1g --executor-memory 1g --executor-cores 1
+* * > sc.parallelize(1 to 1000).count()
 
 ## References
 * http://horicky.blogspot.com/2013/12/spark-low-latency-massively-parallel.html
