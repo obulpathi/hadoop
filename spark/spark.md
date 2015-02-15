@@ -93,6 +93,60 @@ Spark provides a powerful processing framework for building low latency, massive
 * /bin/spark-shell --master yarn-client --driver-memory 1g --executor-memory 1g --executor-cores 1
 * sc.parallelize(1 to 1000).count()
 
+## Writing Spark code
+* Spark application consists of a driver program that launches various parallel operations on a cluster.
+* The driver program contains your application's main function and defines distributed datasets on the cluster, then applies operations to them.
+* Driver programs access Spark through a SparkContext object
+* Code can be passed to Spark through lambdas or defined functions.
+
+## Programming
+* Spark’s core abstraction for working with data, the resilient distributed dataset (RDD).
+* An RDD is simply a distributed collection of elements. In Spark all work is expressed as either creating new RDDs, transforming existing RDDs, or calling operations on RDDs to compute a result.
+* Under the hood, Spark automatically distributes the data contained in RDDs across your cluster and parallelizes the operations you perform on them.
+* Once created, RDDs offer two types of operations: transformations and actions.
+* Transformations construct a new RDD from a previous one.
+* Actions compute a result based on an RDD, and either return it to the driver program or save it to an external storage system
+* Spark’s RDDs are by default recomputed each time you run an action on them.
+* If you would like to reuse an RDD in multiple actions, you can ask Spark to persist it using RDD.persist()
+
+
+## Program Structure
+1. Create some input RDDs from external data.
+2. Transform them to define new RDDs using transformations like filter() .
+3. Ask Spark to persist() any intermediate RDDs that will need to be reused.
+4. Launch actions such as count() and first() to kick off a parallel computation, which is then optimized and executed by Spark.
+
+* lines = sc.parallelize(["pandas", "i like pandas"])
+* lines = sc.textFile("/path/to/README.md")
+
+## Common Transformations
+* map() and filter()
+* flatMap()
+* set operations: distinct, union, intersection, subtract
+* sample()
+* cartesian()
+
+## Common Actions
+* reduce()
+* fold()
+* aggregate()
+* collect()
+* take(n)
+* top()
+* count()
+* countByValue()
+
+## Pair RDD
+* Used to store key/value pairs
+* Data is partitioned across the cluster by key
+* pairs = lines.map(lambda x: (x.split(" ")[0], x))
+* reduceByKey(func)
+* groupByKey()
+* keys()
+* values()
+* sortByKey()
+*
+
 ## References
 * http://horicky.blogspot.com/2013/12/spark-low-latency-massively-parallel.html
 * https://github.com/apache/spark/tree/master/examples/src/main/python
