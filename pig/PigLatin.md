@@ -57,15 +57,18 @@
 ## File location in local mode
 * stocks = LOAD '/root/stocks' AS (exchange, symbol, date, dividends);
 * stocks = LOAD '/root/logs/' AS (exchange, symbol, date, dividends);
+* stocks = LOAD '$STOCKS' AS (exchange, symbol, date, dividends);
 
 ## File location in distributed mode
 * stocks = LOAD 'stocks' AS (exchange, symbol, date, dividends);
 * stocks = LOAD 'logs/' AS (exchange, symbol, date, dividends);
+* stocks = LOAD '$STOCKS' AS (exchange, symbol, date, dividends);
 
 ## Output
 * Output is always a directory
 * STORE processed INTO '/data/examples/processed';
 * STORE processed INTO 'processed' using PigStorage(',');
+* STORE processed INTO '$STOCKS' using PigStorage(',');
 * By default, PigStorage is used for writing output with tab delimited format.
 * DUMP processed;
 
