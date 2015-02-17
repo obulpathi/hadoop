@@ -17,3 +17,10 @@ A topology is a network of spouts and bolts, with each edge in the network repre
 
 ## Local mode
 Storm has a "local mode" where a Storm cluster is simulated in-process. This is useful for development and testing. The "storm" command line client is used when ready to submit a topology for execution on an actual cluster.
+
+
+## References:
+* http://storm.apache.org/about/simple-api.html
+* http://storm.apache.org/documentation/Home.html
+* http://storm.apache.org/documentation/Tutorial.html
+* http://storm.apache.org/about/multi-language.html
