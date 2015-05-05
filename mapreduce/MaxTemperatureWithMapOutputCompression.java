@@ -1,4 +1,3 @@
-// == MaxTemperatureWithMapOutputCompression
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
@@ -18,20 +17,18 @@ public class MaxTemperatureWithMapOutputCompression {
       		"<input path> <output path>");
       System.exit(-1);
     }
-    
+
     JobConf conf = new JobConf(MaxTemperatureWithCompression.class);
     conf.setJobName("Max temperature with map output compression");
 
     FileInputFormat.addInputPath(conf, new Path(args[0]));
     FileOutputFormat.setOutputPath(conf, new Path(args[1]));
-    
+
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(IntWritable.class);
-    
-    // vv MaxTemperatureWithMapOutputCompression
+
     conf.setCompressMapOutput(true);
     conf.setMapOutputCompressorClass(GzipCodec.class);
-    // ^^ MaxTemperatureWithMapOutputCompression
 
     conf.setMapperClass(MaxTemperatureMapper.class);
     conf.setCombinerClass(MaxTemperatureReducer.class);
