@@ -1,0 +1,5 @@
+Get Hadoop Classpath: hadoop classpath
+Compiling: javac -cp `(hadoop classpath)` *.java
+Bundle class files into jat file: jar cvf MaxTemperature.jar *.class
+Copy the input files to hdfs: hadoop fs -cp input/* input/
+Execute MapReduce: hadoop jar MaxTemperature.jar MaxTemperature input/*.gz output
