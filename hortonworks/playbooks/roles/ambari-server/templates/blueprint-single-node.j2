@@ -1,0 +1,221 @@
+{
+  "configurations" : [
+      {
+      "hdfs-site" : {
+        "dfs.datanode.data.dir" : "{% if data_disks_devices is defined and data_disks_devices and data_disks_devices|length > 1 %}{% for disk in data_disks_devices %}/disk{{ loop.index }}/hadoop/hdfs/data{% if not loop.last %},{% endif %}{%- endfor %}{% else %}/hadoop/hdfs/data{% endif %}",
+        "dfs.datanode.failed.volumes.tolerated" : "{{ hdfs.failed_volumes_tolerated }}",
+        "dfs.replication" : "{{ hdfs.dfs_replication }}"
+      }
+    },
+    {% if install_hbase == true and ansible_memtotal_mb > 24000 -%}
+    {% if ansible_memtotal_mb > 80000 -%}
+    {
+      "hbase-env" : {
+        "hbase_master_heapsize" : "2048m",
+        "hbase_regionserver_heapsize" : "4096m",
+        "hbase_regionserver_xmn_max" : "768"
+      }
+    },
+    {% else -%}
+    {
+      "hbase-env" : {
+        "hbase_master_heapsize" : "1024m",
+        "hbase_regionserver_heapsize" : "2048m",
+        "hbase_regionserver_xmn_max" : "512"
+      }
+    },
+    {% endif -%}
+    {% endif -%}
+    {% if ansible_memtotal_mb > 24000 -%}
+    {
+      "mapred-site" : {
+        {% if ansible_memtotal_mb > 60000 -%}
+        "mapreduce.map.java.opts" : "-Xmx3276m",
+        "mapreduce.map.memory.mb" : "4096",
+        "mapreduce.reduce.java.opts" : "-Xmx3276m",
+        "mapreduce.reduce.memory.mb" : "4096",
+        "mapreduce.task.io.sort.mb" : "1536",
+        "yarn.app.mapreduce.am.command-opts" : "-Xmx3276m -Dhdp.version=${hdp.version}",
+        "yarn.app.mapreduce.am.resource.mb" : "4096"
+        {% else -%}
+        "mapreduce.map.java.opts" : "-Xmx1638m",
+        "mapreduce.map.memory.mb" : "2048",
+        "mapreduce.reduce.java.opts" : "-Xmx1638m",
+        "mapreduce.reduce.memory.mb" : "2048",
+        "mapreduce.task.io.sort.mb" : "768",
+        "yarn.app.mapreduce.am.command-opts" : "-Xmx1638m -Dhdp.version=${hdp.version}",
+        "yarn.app.mapreduce.am.resource.mb" : "2048"
+        {% endif -%}
+      }
+    },
+    {
+      "yarn-site" : {
+        {% if ansible_memtotal_mb > 80000 -%}
+        "yarn.nodemanager.resource.memory-mb" : "65536",
+        "yarn.scheduler.maximum-allocation-mb" : "65536",
+        {% else -%}
+        "yarn.nodemanager.resource.memory-mb" : "{{ ((ansible_memtotal_mb - 15000)//1024)*1024 }}",
+        "yarn.scheduler.maximum-allocation-mb" : "{{ ((ansible_memtotal_mb - 15000)//1024)*1024 }}",
+        {% endif -%}
+        {% if ansible_memtotal_mb > 60000 -%}
+        "yarn.scheduler.minimum-allocation-mb" : "4096"
+        {% else -%}
+        "yarn.scheduler.minimum-allocation-mb" : "2048"
+        {% endif -%}
+      }
+    },
+    {% endif -%}
+    {
+      "hive-site" : {
+        "fs.file.impl.disable.cache" : "true",
+        "fs.hdfs.impl.disable.cache" : "true",
+        "javax.jdo.option.ConnectionPassword" : "{{ services_password }}"
+      }
+    }
+  ],
+  "host_groups" : [
+    {
+      "name" : "single_node",
+      "configurations" : [ ],
+      "components" : [
+        {
+          "name" : "ZOOKEEPER_CLIENT"
+        },
+        {
+          "name" : "PIG"
+        },
+        {
+          "name" : "OOZIE_CLIENT"
+        },
+        {
+          "name" : "SQOOP"
+        },
+        {
+          "name" : "HIVE_CLIENT"
+        },
+        {
+          "name" : "HDFS_CLIENT"
+        },
+        {
+          "name" : "YARN_CLIENT"
+        },
+        {
+          "name" : "HCAT"
+        },
+        {
+          "name" : "MAPREDUCE2_CLIENT"
+        },
+        {
+          "name" : "TEZ_CLIENT"
+        },
+        {
+          "name" : "SLIDER"
+        },
+        {
+          "name" : "ZOOKEEPER_SERVER"
+        },
+        {
+          "name" : "HISTORYSERVER"
+        },
+        {
+          "name" : "SECONDARY_NAMENODE"
+        },
+        {
+          "name" : "AMBARI_SERVER"
+        },
+        {
+          "name" : "APP_TIMELINE_SERVER"
+        },
+        {
+          "name" : "METRICS_COLLECTOR"
+        },
+        {
+          "name" : "RESOURCEMANAGER"
+        },
+        {
+          "name" : "HIVE_SERVER"
+        },
+        {
+          "name" : "HIVE_METASTORE"
+        },
+        {
+          "name" : "WEBHCAT_SERVER"
+        },
+        {
+          "name" : "MYSQL_SERVER"
+        },
+        {
+          "name" : "NAMENODE"
+        },
+        {
+          "name" : "OOZIE_SERVER"
+        },
+        {
+          "name" : "NODEMANAGER"
+        },
+        {
+          "name" : "DATANODE"
+        },
+        {% if install_flume == true -%}
+        {
+          "name" : "FLUME_HANDLER"
+        },
+        {% endif -%}
+        {% if install_spark == true -%}
+        {
+          "name" : "SPARK_JOBHISTORYSERVER"
+        },
+        {
+          "name" : "SPARK_CLIENT"
+        },
+        {% endif -%}
+        {% if install_hbase == true -%}
+        {
+          "name" : "HBASE_REGIONSERVER"
+        },
+        {
+          "name" : "HBASE_CLIENT"
+        },
+        {
+          "name" : "HBASE_MASTER"
+        },
+        {% endif -%}
+        {% if install_storm == true -%}
+        {
+          "name" : "SUPERVISOR"
+        },
+        {
+          "name" : "STORM_UI_SERVER"
+        },
+        {
+          "name" : "DRPC_SERVER"
+        },
+        {
+          "name" : "NIMBUS"
+        },
+        {% endif -%}
+        {% if install_kafka == true -%}
+        {
+          "name" : "KAFKA_BROKER"
+        },
+        {% endif -%}
+        {% if install_falcon == true -%}
+        {
+          "name" : "FALCON_SERVER"
+        },
+        {
+          "name" : "FALCON_CLIENT"
+        },
+        {% endif -%}
+        {
+          "name" : "METRICS_MONITOR"
+        }
+      ],
+      "cardinality" : "1"
+    }
+  ],
+  "Blueprints" : {
+    "stack_name" : "HDP",
+    "stack_version" : "2.2"
+  }
+}

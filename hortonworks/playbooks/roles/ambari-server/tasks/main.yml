@@ -1,0 +1,104 @@
+---
+- include: prerequisites.yml
+
+- include: single-node.yml
+  when: groups['master-nodes']|length == 1 and ('slave-nodes' not in groups or groups['slave-nodes']|length == 0)
+
+- include: multi-nodes.yml
+  when: groups['master-nodes']|length > 0 and 'slave-nodes' in groups and groups['slave-nodes']|length > 0
+
+#TEMPORARILY DISABLED UNTIL LOCAL REPOS ARE FUNCTIONAL
+#- name: Upload HDP Repo
+#  template: src=hdprepo.j2 dest=/tmp/hdprepo mode=0644
+#
+#- name: Slurp the hdp repo
+#  slurp: src=/tmp/hdprepo
+#  register: hdprepo
+#
+#- name: modify repo base_url
+#  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/stacks2/HDP/versions/2.2/operatingSystems/redhat6/repositories/HDP-2.2
+#       method=PUT
+#       force_basic_auth=yes
+#       user=admin
+#       password=admin
+#       HEADER_X-Requested-By="ambari"
+#       body="{{ hdprepo.content | b64decode }}"
+#       status_code=200,201,202
+
+- name: Upload the alert_targets payload
+  template: src=alert_targets.j2 dest=/tmp/alert_targets mode=0644
+
+- name: Slurp the alert_targets payload
+  slurp: src=/tmp/alert_targets
+  register: alert_targets
+
+- name: Check if alert_targets already exists
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/alert_targets
+       method=GET
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       status_code=200,201,202,404
+       return_content=yes
+  register: current_alert_targets
+
+- name: Register the alert_targets with the Ambari server
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/alert_targets
+       method=POST
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       body='{{ alert_targets.content | b64decode }}'
+       status_code=200,201,202
+  when: '"AlertTarget" not in current_alert_targets.content'
+
+- name: Slurp the blueprint
+  slurp: src=/tmp/cluster_blueprint
+  register: cluster_blueprint
+
+- name: Make sure the blueprint doesn't already exist
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/blueprints/cluster_blueprint
+       method=DELETE
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       status_code=200,201,202,404
+  ignore_errors: true
+
+- name: Register the blueprint with the Ambari server
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/blueprints/cluster_blueprint
+       method=POST
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       body='{{ cluster_blueprint.content | b64decode }}'
+       status_code=200,201,202
+
+- name: Slurp the cluster creation template
+  slurp: src=/tmp/cluster_template
+  register: cluster_template
+
+- name: Create the cluster instance
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/clusters/{{ cluster_name }}
+       method=POST
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       body='{{ cluster_template.content | b64decode }}'
+       status_code=200,201,202
+
+- name: Change Ambari admin user password
+  uri: url=http://{{ ansible_fqdn }}:8080/api/v1/users/admin
+       method=PUT
+       force_basic_auth=yes
+       user=admin
+       password=admin
+       HEADER_X-Requested-By="ambari"
+       body='{"Users":{ "password":"{{ admin_password }}", "old_password":"admin"}}'
+       status_code=200,201,202
+  when: admin_password != 'admin'
